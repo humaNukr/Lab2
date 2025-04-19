@@ -1,121 +1,88 @@
-// DataModel.java
+
+import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class DataModel {
-    private List<ProductGroup> groups;
+public class DataManager {
+    private static final String GROUPS_FILE = "groups.dat";
+    private static final String PRODUCTS_DIR = "products/";
 
-    public DataModel() {
-        // Ініціалізація файлової системи
-        FileManager.initFileSystem();
-
-        // Завантаження груп з файлу
-        groups = FileManager.loadGroups();
-
-        // Завантаження товарів для кожної групи
-        for (ProductGroup group : groups) {
-            FileManager.loadProductsForGroup(group);
-        }
-
-        // Якщо груп немає, створюємо декілька зразків
-        if (groups.isEmpty()) {
-            initializeDefaultData();
+    public DataManager() {
+        File dir = new File(PRODUCTS_DIR);
+        if (!dir.exists()) {
+            dir.mkdirs();
         }
     }
 
-    private void initializeDefaultData() {
-        // Створення зразків груп і товарів
-        ProductGroup food = new ProductGroup("Продовольчі", "Харчові продукти");
-        food.addProduct(new Product("Гречка", "Крупа гречана", "Україна", 100, 42.50));
-        food.addProduct(new Product("Рис", "Рис довгозернистий", "Китай", 80, 35.75));
-
-        ProductGroup nonFood = new ProductGroup("Непродовольчі", "Нехарчові товари");
-        nonFood.addProduct(new Product("Мило", "Господарське мило", "Україна", 50, 15.20));
-
-        groups.add(food);
-        groups.add(nonFood);
-
-        // Збереження зразків
-        saveAllData();
+    public void saveGroups(List<ProductGroup> groups) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(GROUPS_FILE))) {
+            oos.writeObject(new ArrayList<>(groups));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    public List<ProductGroup> getGroups() {
-        return groups;
+    @SuppressWarnings("unchecked")
+    public List<ProductGroup> loadGroups() {
+        File file = new File(GROUPS_FILE);
+        if (!file.exists()) {
+            return new ArrayList<>();
+        }
+
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
+            return (List<ProductGroup>) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 
-    public void addGroup(ProductGroup group) {
-        groups.add(group);
-        FileManager.saveGroups(groups);
+    public void saveProducts(String groupName, List<Product> products) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(
+                new FileOutputStream(PRODUCTS_DIR + groupName + ".dat"))) {
+            oos.writeObject(new ArrayList<>(products));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    public void updateGroup(String oldName, ProductGroup group) {
-        FileManager.renameProductFile(oldName, group.getName());
-        FileManager.saveGroups(groups);
+    @SuppressWarnings("unchecked")
+    public List<Product> loadProducts(String groupName) {
+        File file = new File(PRODUCTS_DIR + groupName + ".dat");
+        if (!file.exists()) {
+            return new ArrayList<>();
+        }
+
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
+            return (List<Product>) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 
-    public void removeGroup(ProductGroup group) {
-        groups.remove(group);
-        FileManager.deleteProductFile(group.getName());
-        FileManager.saveGroups(groups);
+    public void deleteProductsFile(String groupName) {
+        File file = new File(PRODUCTS_DIR + groupName + ".dat");
+        if (file.exists()) {
+            file.delete();
+        }
     }
 
-    public ProductGroup getGroupByName(String name) {
-        for (ProductGroup group : groups) {
-            if (group.getName().equals(name)) {
-                return group;
+    public Map<String, List<Product>> loadAllProducts() {
+        Map<String, List<Product>> allProducts = new HashMap<>();
+
+        File dir = new File(PRODUCTS_DIR);
+        File[] files = dir.listFiles((d, name) -> name.endsWith(".dat"));
+
+        if (files != null) {
+            for (File file : files) {
+                String groupName = file.getName().replace(".dat", "");
+                allProducts.put(groupName, loadProducts(groupName));
             }
         }
-        return null;
-    }
 
-    public boolean groupExists(String name) {
-        return getGroupByName(name) != null;
-    }
-
-    public boolean isProductNameUnique(String productName, String currentGroupName) {
-        return FileManager.isProductNameUnique(productName, groups, currentGroupName);
-    }
-
-    public void saveAllData() {
-        FileManager.saveGroups(groups);
-        for (ProductGroup group : groups) {
-            FileManager.saveProductsForGroup(group);
-        }
-    }
-
-    public Product findProduct(String productName) {
-        for (ProductGroup group : groups) {
-            for (Product product : group.getProducts()) {
-                if (product.getName().toLowerCase().contains(productName.toLowerCase())) {
-                    return product;
-                }
-            }
-        }
-        return null;
-    }
-
-    public ProductGroup findProductGroup(String productName) {
-        for (ProductGroup group : groups) {
-            for (Product product : group.getProducts()) {
-                if (product.getName().toLowerCase().contains(productName.toLowerCase())) {
-                    return group;
-                }
-            }
-        }
-        return null;
-    }
-
-    public void addProductToGroup(ProductGroup group, Product product) {
-        group.addProduct(product);
-        FileManager.saveProductsForGroup(group);
-    }
-
-    public void updateProductInGroup(ProductGroup group) {
-        FileManager.saveProductsForGroup(group);
-    }
-
-    public void removeProductFromGroup(ProductGroup group, Product product) {
-        group.removeProduct(product);
-        FileManager.saveProductsForGroup(group);
+        return allProducts;
     }
 }
