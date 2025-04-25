@@ -203,26 +203,6 @@ public class MainFrame extends JFrame {
         totalValueLabel.setText("Загальна вартість: " + df.format(totalValue) + " грн");
     }
 
-    private void addGroup() {
-        GroupDialog dialog = new GroupDialog(this, null);
-        ProductGroup newGroup = dialog.showDialog();
-
-        if (newGroup != null) {
-            boolean success = service.addGroup(newGroup);
-
-            if (success) {
-                groupListModel.addElement(newGroup);
-                statusLabel.setText("Група товарів додана: " + newGroup.getName());
-                updateTotalValue();
-            } else {
-                JOptionPane.showMessageDialog(this,
-                        "Група з такою назвою вже існує!",
-                        "Помилка",
-                        JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }
-
     private void editGroup() {
         ProductGroup selectedGroup = groupList.getSelectedValue();
 
@@ -259,6 +239,25 @@ public class MainFrame extends JFrame {
                     "Будь ласка, виберіть групу для редагування",
                     "Інформація",
                     JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+    private void addGroup() {
+        GroupDialog dialog = new GroupDialog(this, null);
+        ProductGroup newGroup = dialog.showDialog();
+
+        if (newGroup != null) {
+            boolean success = service.addGroup(newGroup);
+
+            if (success) {
+                groupListModel.addElement(newGroup);
+                statusLabel.setText("Група товарів додана: " + newGroup.getName());
+                updateTotalValue();
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Група з такою назвою вже існує!",
+                        "Помилка",
+                        JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 

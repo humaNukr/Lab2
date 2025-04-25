@@ -82,7 +82,6 @@ public class DataManager {
                 allProducts.put(groupName, loadProducts(groupName));
             }
         }
-
         return allProducts;
     }
 }
