@@ -129,7 +129,7 @@ public class StatisticsDialog extends JDialog {
         double totalWarehouseValue = service.getTotalWarehouseValue();
         totalWarehouseValueLabel.setText("Загальна вартість складу: " + df.format(totalWarehouseValue) + " грн");
 
-        // Заповнюємо комбобокс групами
+        // Заповнюємо групами
         groupComboBox.removeAllItems();
         List<ProductGroup> groups = service.getAllGroups();
         for (ProductGroup group : groups) {
