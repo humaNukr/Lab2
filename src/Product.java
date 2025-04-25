@@ -1,3 +1,5 @@
+
+
 import java.io.Serializable;
 
 public class Product implements Serializable {
@@ -11,9 +13,15 @@ public class Product implements Serializable {
     private String groupName;
 
     public Product(String name, String description, String manufacturer, int quantity, double price, String groupName) {
+        this.name = name;
+        this.description = description;
+        this.manufacturer = manufacturer;
+        this.quantity = quantity;
+        this.price = price;
+        this.groupName = groupName;
     }
 
-    // Basic getters and setters
+    // Getters and setters
     public String getName() {
         return name;
     }
@@ -47,11 +55,14 @@ public class Product implements Serializable {
     }
 
     public void addQuantity(int amount) {
-        // TODO: Реалізуйте метод додавання кількості
+        this.quantity += amount;
     }
 
     public boolean removeQuantity(int amount) {
-        // TODO: Реалізуйте метод віднімання кількості
+        if (amount <= this.quantity) {
+            this.quantity -= amount;
+            return true;
+        }
         return false;
     }
 
@@ -72,15 +83,11 @@ public class Product implements Serializable {
     }
 
     public double getTotalValue() {
-        return 0.0;
-    }
-
-    public String getProductByName(String name) {
-        return name;
+        return quantity * price;
     }
 
     @Override
     public String toString() {
-        return "";
+        return name;
     }
 }
