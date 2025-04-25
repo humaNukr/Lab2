@@ -1,3 +1,5 @@
+
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,8 +12,12 @@ public class ProductGroup implements Serializable {
     private List<Product> products;
 
     public ProductGroup(String name, String description) {
+        this.name = name;
+        this.description = description;
+        this.products = new ArrayList<>();
     }
 
+    // Getters and setters
     public String getName() {
         return name;
     }
@@ -37,22 +43,27 @@ public class ProductGroup implements Serializable {
     }
 
     public void addProduct(Product product) {
+        products.add(product);
     }
 
     public boolean removeProduct(Product product) {
-        return false;
+        return products.remove(product);
     }
 
     public boolean removeProductByName(String productName) {
-        return false;
+        return products.removeIf(p -> p.getName().equals(productName));
     }
 
     public double getTotalValue() {
-        return 0.0;
+        double total = 0;
+        for (Product product : products) {
+            total += product.getTotalValue();
+        }
+        return total;
     }
 
     @Override
     public String toString() {
-        return "";
+        return name;
     }
 }
