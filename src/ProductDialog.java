@@ -30,7 +30,10 @@ public class ProductDialog extends JDialog {
             descriptionArea.setText(product.getDescription());
             manufacturerField.setText(product.getManufacturer());
             priceField.setText(String.valueOf(product.getPrice()));
-            quantityField.setText(String.valueOf(product.getQuantity()));
+            // Встановлюємо кількість тільки якщо створюємо новий товар
+            if (quantityField != null) {
+                quantityField.setText(String.valueOf(product.getQuantity()));
+            }
         }
 
         setSize(450, 400);
@@ -47,16 +50,7 @@ public class ProductDialog extends JDialog {
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
         // Назва
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.weightx = 0;
-        formPanel.add(new JLabel("Назва:"), gbc);
-
-        nameField = new JTextField(20);
-        gbc.gridx = 1;
-        gbc.gridy = 0;
-        gbc.weightx = 1;
-        formPanel.add(nameField, gbc);
+        addFormField(formPanel, "Назва:", nameField = new JTextField(20), gbc, 0);
 
         // Опис
         gbc.gridx = 0;
@@ -68,7 +62,6 @@ public class ProductDialog extends JDialog {
         descriptionArea.setLineWrap(true);
         descriptionArea.setWrapStyleWord(true);
         JScrollPane scrollPane = new JScrollPane(descriptionArea);
-
         gbc.gridx = 1;
         gbc.gridy = 1;
         gbc.weightx = 1;
@@ -77,73 +70,49 @@ public class ProductDialog extends JDialog {
         formPanel.add(scrollPane, gbc);
 
         // Виробник
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        gbc.weightx = 0;
-        gbc.weighty = 0;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        formPanel.add(new JLabel("Виробник:"), gbc);
-
-        manufacturerField = new JTextField(20);
-        gbc.gridx = 1;
-        gbc.gridy = 2;
-        gbc.weightx = 1;
-        formPanel.add(manufacturerField, gbc);
+        addFormField(formPanel, "Виробник:", manufacturerField = new JTextField(20), gbc, 2);
 
         // Ціна
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        gbc.weightx = 0;
-        formPanel.add(new JLabel("Ціна:"), gbc);
+        addFormField(formPanel, "Ціна:", priceField = new JTextField(10), gbc, 3);
 
-        priceField = new JTextField(10);
-        gbc.gridx = 1;
-        gbc.gridy = 3;
-        gbc.weightx = 1;
-        formPanel.add(priceField, gbc);
-
-        // Кількість
-        gbc.gridx = 0;
-        gbc.gridy = 4;
-        gbc.weightx = 0;
-        formPanel.add(new JLabel("Кількість:"), gbc);
-
-        quantityField = new JTextField(10);
-        gbc.gridx = 1;
-        gbc.gridy = 4;
-        gbc.weightx = 1;
-        formPanel.add(quantityField, gbc);
+        // Кількість (тільки для нового товару)
+        if (originalProduct == null) {
+            addFormField(formPanel, "Кількість:", quantityField = new JTextField(10), gbc, 4);
+        }
 
         mainPanel.add(formPanel, BorderLayout.CENTER);
 
         // Кнопки
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-
-        JButton saveButton = new JButton("Зберегти");
-        saveButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                saveProduct();
-            }
-        });
-
-        JButton cancelButton = new JButton("Скасувати");
-        cancelButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                result = null;
-                dispose();
-            }
-        });
-
-        buttonPanel.add(saveButton);
-        buttonPanel.add(cancelButton);
-
+        addButtons(buttonPanel);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
-
         add(mainPanel);
     }
+    private void addButtons(JPanel buttonPanel) {
+        JButton okButton = new JButton("OK");
+        JButton cancelButton = new JButton("Скасувати");
+    
+        okButton.addActionListener(e -> saveProduct());
+        cancelButton.addActionListener(e -> dispose());
+    
+        buttonPanel.add(okButton);
+        buttonPanel.add(cancelButton);
+    
+        // Встановлюємо OK як кнопку за замовчуванням
+        getRootPane().setDefaultButton(okButton);
+    }
+    private void addFormField(JPanel panel, String label, JComponent field, GridBagConstraints gbc, int row) {
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.weightx = 0;
+        gbc.weighty = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        panel.add(new JLabel(label), gbc);
 
+        gbc.gridx = 1;
+        gbc.weightx = 1;
+        panel.add(field, gbc);
+    }
     private void saveProduct() {
         String name = nameField.getText().trim();
         String description = descriptionArea.getText().trim();
@@ -159,7 +128,7 @@ public class ProductDialog extends JDialog {
 
         try {
             double price = Double.parseDouble(priceField.getText().trim());
-            int quantity = Integer.parseInt(quantityField.getText().trim());
+            int quantity;
 
             if (price < 0) {
                 JOptionPane.showMessageDialog(this,
@@ -169,12 +138,18 @@ public class ProductDialog extends JDialog {
                 return;
             }
 
-            if (quantity < 0) {
-                JOptionPane.showMessageDialog(this,
-                        "Кількість не може бути від'ємною!",
-                        "Помилка",
-                        JOptionPane.ERROR_MESSAGE);
-                return;
+            // Якщо це редагування, зберігаємо стару кількість
+            if (originalProduct != null) {
+                quantity = originalProduct.getQuantity();
+            } else {
+                quantity = Integer.parseInt(quantityField.getText().trim());
+                if (quantity < 0) {
+                    JOptionPane.showMessageDialog(this,
+                            "Кількість не може бути від'ємною!",
+                            "Помилка",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
             }
 
             result = new Product(name, description, manufacturer, quantity, price, groupName);
@@ -182,12 +157,11 @@ public class ProductDialog extends JDialog {
 
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this,
-                    "Будь ласка, введіть коректні числові значення для ціни та кількості!",
+                    "Будь ласка, введіть коректні числові значення!",
                     "Помилка",
                     JOptionPane.ERROR_MESSAGE);
         }
     }
-
     public Product showDialog() {
         setVisible(true);
         return result;

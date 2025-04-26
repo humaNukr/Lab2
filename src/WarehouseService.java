@@ -157,17 +157,16 @@ public class WarehouseService {
 
     public List<Product> searchProducts(String query) {
         List<Product> result = new ArrayList<>();
-
+        String lowercaseQuery = query.toLowerCase();
+    
         for (ProductGroup group : groups) {
             for (Product product : group.getProducts()) {
-                if (product.getName().toLowerCase().contains(query.toLowerCase()) ||
-                        product.getDescription().toLowerCase().contains(query.toLowerCase()) ||
-                        product.getManufacturer().toLowerCase().contains(query.toLowerCase())) {
+                if (product.getName().toLowerCase().contains(lowercaseQuery)) {
                     result.add(product);
                 }
             }
         }
-
+    
         return result;
     }
 

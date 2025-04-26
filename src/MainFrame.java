@@ -101,8 +101,8 @@ public class MainFrame extends JFrame {
         addProductBtn = createTextButton("➕ Додати", e -> addProduct());
         editProductBtn = createTextButton("✏️ Редагувати", e -> editProduct());
         deleteProductBtn = createTextButton("🗑️ Видалити", e -> deleteProduct());
-        addQuantityBtn = createTextButton("📥 Додати товар", e -> addQuantity());
-        removeQuantityBtn = createTextButton("📤 Прибрати товар", e -> removeQuantity());
+        addQuantityBtn = createTextButton("📥 Додати кількість", e -> addQuantity());
+        removeQuantityBtn = createTextButton("📤 Прибрати кількість", e -> removeQuantity());
 
         productButtonPanel.add(addProductBtn);
         productButtonPanel.add(editProductBtn);
@@ -203,9 +203,39 @@ public class MainFrame extends JFrame {
         totalValueLabel.setText("Загальна вартість: " + df.format(totalValue) + " грн");
     }
 
+    private void addGroup() {
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Ви хочете додати нову групу товарів?",
+                "Додавання групи",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
+                
+        if (confirm == JOptionPane.YES_OPTION) {
+            GroupDialog dialog = new GroupDialog(this, null);
+            ProductGroup newGroup = dialog.showDialog();
+    
+            if (newGroup != null) {
+                boolean success = service.addGroup(newGroup);
+                if (success) {
+                    groupListModel.addElement(newGroup);
+                    JOptionPane.showMessageDialog(this,
+                            "Групу \"" + newGroup.getName() + "\" успішно додано!",
+                            "Успіх",
+                            JOptionPane.INFORMATION_MESSAGE);
+                    statusLabel.setText("Група товарів додана: " + newGroup.getName());
+                    updateTotalValue();
+                } else {
+                    JOptionPane.showMessageDialog(this,
+                            "Група з такою назвою вже існує!",
+                            "Помилка",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }
+    }
+    
     private void editGroup() {
         ProductGroup selectedGroup = groupList.getSelectedValue();
-
         if (selectedGroup != null) {
             GroupDialog dialog = new GroupDialog(this, selectedGroup);
             ProductGroup updatedGroup = dialog.showDialog();
@@ -213,7 +243,6 @@ public class MainFrame extends JFrame {
             if (updatedGroup != null) {
                 String oldName = selectedGroup.getName();
                 boolean success = service.updateGroup(oldName, updatedGroup);
-
                 if (success) {
                     // Оновлюємо список
                     loadData();
@@ -225,42 +254,14 @@ public class MainFrame extends JFrame {
                             break;
                         }
                     }
-
-                    statusLabel.setText("Група товарів оновлена: " + updatedGroup.getName());
-                } else {
                     JOptionPane.showMessageDialog(this,
-                            "Група з такою назвою вже існує!",
-                            "Помилка",
-                            JOptionPane.ERROR_MESSAGE);
+                            "Групу успішно відредаговано!",
+                            "Успіх",
+                            JOptionPane.INFORMATION_MESSAGE);
                 }
             }
-        } else {
-            JOptionPane.showMessageDialog(this,
-                    "Будь ласка, виберіть групу для редагування",
-                    "Інформація",
-                    JOptionPane.INFORMATION_MESSAGE);
         }
     }
-    private void addGroup() {
-        GroupDialog dialog = new GroupDialog(this, null);
-        ProductGroup newGroup = dialog.showDialog();
-
-        if (newGroup != null) {
-            boolean success = service.addGroup(newGroup);
-
-            if (success) {
-                groupListModel.addElement(newGroup);
-                statusLabel.setText("Група товарів додана: " + newGroup.getName());
-                updateTotalValue();
-            } else {
-                JOptionPane.showMessageDialog(this,
-                        "Група з такою назвою вже існує!",
-                        "Помилка",
-                        JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }
-
     private void deleteGroup() {
         ProductGroup selectedGroup = groupList.getSelectedValue();
 
@@ -291,59 +292,76 @@ public class MainFrame extends JFrame {
 
     private void addProduct() {
         ProductGroup selectedGroup = groupList.getSelectedValue();
-
         if (selectedGroup != null) {
-            ProductDialog dialog = new ProductDialog(this, null, selectedGroup.getName());
-            Product newProduct = dialog.showDialog();
-
-            if (newProduct != null) {
-                boolean success = service.addProduct(newProduct);
-
-                if (success) {
-                    loadProductsForSelectedGroup();
-                    statusLabel.setText("Товар доданий: " + newProduct.getName());
-                    updateTotalValue();
-                } else {
-                    JOptionPane.showMessageDialog(this,
-                            "Товар з такою назвою вже існує!",
-                            "Помилка",
-                            JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        } else {
-            JOptionPane.showMessageDialog(this,
-                    "Будь ласка, виберіть групу для додавання товару",
-                    "Інформація",
-                    JOptionPane.INFORMATION_MESSAGE);
-        }
-    }
-
-    private void editProduct() {
-        int selectedRow = productTable.getSelectedRow();
-
-        if (selectedRow >= 0) {
-            // Отримуємо індекс з урахуванням сортування
-            int modelRow = productTable.convertRowIndexToModel(selectedRow);
-            String productName = (String) productTableModel.getValueAt(modelRow, 0);
-            Product product = service.getProductByName(productName);
-
-            if (product != null) {
-                ProductDialog dialog = new ProductDialog(this, product, product.getGroupName());
-                Product updatedProduct = dialog.showDialog();
-
-                if (updatedProduct != null) {
-                    String oldName = product.getName();
-                    boolean success = service.updateProduct(oldName, updatedProduct);
-
+            int confirm = JOptionPane.showConfirmDialog(this,
+                    "Ви хочете додати новий товар до групи \"" + selectedGroup.getName() + "\"?",
+                    "Додавання товару",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE);
+                    
+            if (confirm == JOptionPane.YES_OPTION) {
+                ProductDialog dialog = new ProductDialog(this, null, selectedGroup.getName());
+                Product newProduct = dialog.showDialog();
+    
+                if (newProduct != null) {
+                    boolean success = service.addProduct(newProduct);
                     if (success) {
                         loadProductsForSelectedGroup();
-                        statusLabel.setText("Товар оновлено: " + updatedProduct.getName());
+                        JOptionPane.showMessageDialog(this,
+                                "Товар \"" + newProduct.getName() + "\" успішно додано!",
+                                "Успіх",
+                                JOptionPane.INFORMATION_MESSAGE);
+                        statusLabel.setText("Товар доданий: " + newProduct.getName());
                         updateTotalValue();
                     } else {
                         JOptionPane.showMessageDialog(this,
                                 "Товар з такою назвою вже існує!",
                                 "Помилка",
                                 JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+        }
+    }
+
+    private void editProduct() {
+        int selectedRow = productTable.getSelectedRow();
+    
+        if (selectedRow >= 0) {
+            int modelRow = productTable.convertRowIndexToModel(selectedRow);
+            String productName = (String) productTableModel.getValueAt(modelRow, 0);
+            Product product = service.getProductByName(productName);
+    
+            if (product != null) {
+                // Показуємо діалог підтвердження
+                int confirm = JOptionPane.showConfirmDialog(this,
+                        "Ви хочете редагувати товар \"" + productName + "\"?",
+                        "Редагування товару",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE);
+    
+                if (confirm == JOptionPane.YES_OPTION) {
+                    ProductDialog dialog = new ProductDialog(this, product, product.getGroupName());
+                    Product updatedProduct = dialog.showDialog();
+    
+                    if (updatedProduct != null) {
+                        String oldName = product.getName();
+                        boolean success = service.updateProduct(oldName, updatedProduct);
+    
+                        if (success) {
+                            loadProductsForSelectedGroup();
+                            JOptionPane.showMessageDialog(this,
+                                    "Товар \"" + updatedProduct.getName() + "\" успішно відредаговано!",
+                                    "Успіх",
+                                    JOptionPane.INFORMATION_MESSAGE);
+                            statusLabel.setText("Товар оновлено: " + updatedProduct.getName());
+                            updateTotalValue();
+                        } else {
+                            JOptionPane.showMessageDialog(this,
+                                    "Товар з такою назвою вже існує!",
+                                    "Помилка",
+                                    JOptionPane.ERROR_MESSAGE);
+                        }
                     }
                 }
             }
@@ -357,34 +375,30 @@ public class MainFrame extends JFrame {
 
     private void deleteProduct() {
         int selectedRow = productTable.getSelectedRow();
-
         if (selectedRow >= 0) {
-            // Отримуємо індекс з урахуванням сортування
             int modelRow = productTable.convertRowIndexToModel(selectedRow);
             String productName = (String) productTableModel.getValueAt(modelRow, 0);
-
+    
             int confirm = JOptionPane.showConfirmDialog(this,
                     "Ви впевнені, що хочете видалити товар \"" + productName + "\"?",
-                    "Підтвердження видалення",
-                    JOptionPane.YES_NO_OPTION);
-
+                    "Видалення товару",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE);
+    
             if (confirm == JOptionPane.YES_OPTION) {
                 boolean success = service.deleteProduct(productName);
-
                 if (success) {
                     loadProductsForSelectedGroup();
+                    JOptionPane.showMessageDialog(this,
+                            "Товар \"" + productName +"\" успішно видалено!",
+                            "Успіх",
+                            JOptionPane.INFORMATION_MESSAGE);
                     statusLabel.setText("Товар видалено: " + productName);
                     updateTotalValue();
                 }
             }
-        } else {
-            JOptionPane.showMessageDialog(this,
-                    "Будь ласка, виберіть товар для видалення",
-                    "Інформація",
-                    JOptionPane.INFORMATION_MESSAGE);
         }
     }
-
     private void addQuantity() {
         int selectedRow = productTable.getSelectedRow();
 
@@ -481,31 +495,54 @@ public class MainFrame extends JFrame {
     }
 
     private void searchProducts() {
-        String query = searchField.getText().trim();
-
+        String query = searchField.getText().trim().toLowerCase();
+        
         if (!query.isEmpty()) {
             List<Product> results = service.searchProducts(query);
-
             productTableModel.setRowCount(0);
-            DecimalFormat df = new DecimalFormat("#,##0.00");
-
-            for (Product product : results) {
-                productTableModel.addRow(new Object[]{
+            
+            if (!results.isEmpty()) {
+                DecimalFormat df = new DecimalFormat("#,##0.00");
+                
+                // Тимчасово видаляємо слухача подій вибору групи
+                ListSelectionListener[] listeners = groupList.getListSelectionListeners();
+                for (ListSelectionListener listener : listeners) {
+                    groupList.removeListSelectionListener(listener);
+                }
+    
+                // Знаходимо та виділяємо групу першого знайденого товару
+                String groupName = results.get(0).getGroupName();
+                for (int i = 0; i < groupListModel.size(); i++) {
+                    ProductGroup group = groupListModel.getElementAt(i);
+                    if (group.getName().toLowerCase().equals(groupName.toLowerCase())) {
+                        groupList.setSelectedIndex(i);
+                        break;
+                    }
+                }
+    
+                // Показуємо тільки знайдені товари
+                for (Product product : results) {
+                    productTableModel.addRow(new Object[]{
                         product.getName(),
                         product.getDescription(),
                         product.getManufacturer(),
                         product.getQuantity(),
                         df.format(product.getPrice()),
                         df.format(product.getTotalValue())
-                });
+                    });
+                }
+    
+                // Відновлюємо слухача подій
+                for (ListSelectionListener listener : listeners) {
+                    groupList.addListSelectionListener(listener);
+                }
+    
+                statusLabel.setText("Знайдено товарів: " + results.size());
+            } else {
+                statusLabel.setText("Товарів не знайдено");
+                groupList.clearSelection();
             }
-
-            // Знімаємо виділення з групи
-            groupList.clearSelection();
-
-            statusLabel.setText("Знайдено товарів: " + results.size());
         } else {
-            // Якщо пошуковий запит порожній, відновлюємо вибрану групу
             ProductGroup selectedGroup = groupList.getSelectedValue();
             if (selectedGroup != null) {
                 loadProductsForSelectedGroup();
@@ -514,6 +551,7 @@ public class MainFrame extends JFrame {
             }
         }
     }
+
 
     private void showStatistics() {
         StatisticsDialog dialog = new StatisticsDialog(this, service);
