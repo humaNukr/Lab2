@@ -2,7 +2,6 @@
 
 import java.util.ArrayList;
 import java.util.List;
-
 /**
  * Клас WarehouseService відповідає за управління складом, групами товарів та окремими товарами.
  * Здійснює завантаження, збереження та обробку даних за допомогою DataManager.
