@@ -111,26 +111,7 @@ public class DataManager {
         }
     }
 
-    /**
-     * Завантажує всі продукти для кожної групи з відповідних файлів.
-     *
-     * @return Карта, де ключ - назва групи, значення - список продуктів цієї групи.
-     */
-
-    public Map<String, List<Product>> loadAllProducts() {
-        Map<String, List<Product>> allProducts = new HashMap<>();
-
-        File dir = new File(PRODUCTS_DIR);
-        File[] files = dir.listFiles((d, name) -> name.endsWith(".dat"));
-
-        if (files != null) {
-            for (File file : files) {
-                String groupName = file.getName().replace(".dat", "");
-                allProducts.put(groupName, loadProducts(groupName));
-            }
-        }
-        return allProducts;
-    }
+   
 
     private static final String DATA_DIR = "data/";
     private static final String GROUPS_DIR = DATA_DIR + "groups/";
