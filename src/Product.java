@@ -2,16 +2,23 @@
 
 import java.io.Serializable;
 
+/**
+ * Клас для представлення продуктів.
+ *
+ * @author Артем Гриценко, Заровська Анастасія
+ * @version 1.0
+ */
 public class Product implements Serializable {
-    private static final long serialVersionUID = 1L;
-
-    private String name;
-    private String description;
-    private String manufacturer;
-    private int quantity;
-    private double price;
-    private String groupName;
-
+    /**
+     * Конструктор класу Product.
+     *
+     * @param name         Назва продукції.
+     * @param description  Опис продукції.
+     * @param manufacturer Виробник продукції.
+     * @param quantity     Кількість продукції.
+     * @param price        Ціна продукції.
+     * @param groupName    Група продукції.
+     */
     public Product(String name, String description, String manufacturer, int quantity, double price, String groupName) {
         this.name = name;
         this.description = description;
@@ -90,4 +97,12 @@ public class Product implements Serializable {
     public String toString() {
         return name;
     }
+    private static final long serialVersionUID = 1L;
+
+    private String name;
+    private String description;
+    private String manufacturer;
+    private int quantity;
+    private double price;
+    private String groupName;
 }

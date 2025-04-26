@@ -6,16 +6,22 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class ProductDialog extends JDialog {
-    private JTextField nameField;
-    private JTextArea descriptionArea;
-    private JTextField manufacturerField;
-    private JTextField priceField;
-    private JTextField quantityField;
+/**
+ * Клас ProductDialog являє собою діалогове вікно для додавання або редагування товару.
+ * Містить текстові поля для введення основних даних про товар, таких як назва, опис, виробник,
+ * ціна та кількість. Використовується для взаємодії користувача з графічним інтерфейсом.
+ *
+ * @author Артем Гриценко, Заровська Анастасія
+ */
 
-    private Product result;
-    private String groupName;
-    private Product originalProduct;
+public class ProductDialog extends JDialog {
+    /**
+     * Конструктор класу ProductDialog.
+     *
+     * @param owner     Головне вікно, до якого прив'язаний цей діалог.
+     * @param product   Екземпляр товару для редагування або null, якщо створюється новий товар.
+     * @param groupName Назва групи, до якої належить товар.
+     */
 
     public ProductDialog(Frame owner, Product product, String groupName) {
         super(owner, product == null ? "Додати товар" : "Редагувати товар", true);
@@ -39,6 +45,11 @@ public class ProductDialog extends JDialog {
         setSize(450, 400);
         setLocationRelativeTo(owner);
     }
+
+    /**
+     * Налаштовує графічний інтерфейс діалогового вікна.
+     * Додає текстові поля, кнопки та інші компоненти для введення даних.
+     */
 
     private void setupUI() {
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
@@ -88,19 +99,36 @@ public class ProductDialog extends JDialog {
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
         add(mainPanel);
     }
+
+    /**
+     * Додає кнопки "OK" та "Скасувати" до панелі кнопок діалогового вікна.
+     *
+     * @param buttonPanel Панель, до якої додаються кнопки.
+     */
     private void addButtons(JPanel buttonPanel) {
         JButton okButton = new JButton("OK");
         JButton cancelButton = new JButton("Скасувати");
-    
+
         okButton.addActionListener(e -> saveProduct());
         cancelButton.addActionListener(e -> dispose());
-    
+
         buttonPanel.add(okButton);
         buttonPanel.add(cancelButton);
-    
+
         // Встановлюємо OK як кнопку за замовчуванням
         getRootPane().setDefaultButton(okButton);
     }
+
+    /**
+     * Додає текстове поле з міткою до форми.
+     *
+     * @param panel Панель, до якої додаються компоненти.
+     * @param label Текст мітки для поля.
+     * @param field Компонент, що використовується для введення даних.
+     * @param gbc   Параметри компонування.
+     * @param row   Рядок, у якому розташовується компонент.
+     */
+
     private void addFormField(JPanel panel, String label, JComponent field, GridBagConstraints gbc, int row) {
         gbc.gridx = 0;
         gbc.gridy = row;
@@ -113,6 +141,12 @@ public class ProductDialog extends JDialog {
         gbc.weightx = 1;
         panel.add(field, gbc);
     }
+
+    /**
+     * Зберігає дані про товар з введених користувачем значень.
+     * Перевіряє правильність введених даних та відображає повідомлення про помилки.
+     */
+
     private void saveProduct() {
         String name = nameField.getText().trim();
         String description = descriptionArea.getText().trim();
@@ -162,8 +196,25 @@ public class ProductDialog extends JDialog {
                     JOptionPane.ERROR_MESSAGE);
         }
     }
+
+    /**
+     * Показує діалогове вікно та повертає результат - новий або змінений товар.
+     *
+     * @return Екземпляр класу Product з даними про товар, якщо користувач натиснув "OK",
+     * або null, якщо діалог було закрито.
+     */
     public Product showDialog() {
         setVisible(true);
         return result;
     }
+
+    private JTextField nameField;
+    private JTextArea descriptionArea;
+    private JTextField manufacturerField;
+    private JTextField priceField;
+    private JTextField quantityField;
+
+    private Product result;
+    private String groupName;
+    private Product originalProduct;
 }

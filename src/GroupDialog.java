@@ -1,17 +1,22 @@
-
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+/**
+ * Клас GroupDialog представляє діалогове вікно для додавання або редагування групи товарів.
+ * Містить текстові поля для введення назви та опису групи.
+ *
+ * @author Артем Гриценко, Заровська Анастасія
+ */
 public class GroupDialog extends JDialog {
-    private JTextField nameField;
-    private JTextArea descriptionArea;
-
-    private ProductGroup result;
-    private ProductGroup originalGroup;
+    /**
+     * Конструктор класу GroupDialog.
+     *
+     * @param owner Головне вікно, до якого прив'язаний цей діалог.
+     * @param group Група товарів для редагування або null, якщо створюється нова група.
+     */
 
     public GroupDialog(Frame owner, ProductGroup group) {
         super(owner, group == null ? "Додати групу товарів" : "Редагувати групу товарів", true);
@@ -98,6 +103,9 @@ public class GroupDialog extends JDialog {
         add(mainPanel);
     }
 
+    /**
+     * Зберігає групу товарів та закриває діалогове вікно.
+     */
     private void saveGroup() {
         String name = nameField.getText().trim();
         String description = descriptionArea.getText().trim();
@@ -120,8 +128,18 @@ public class GroupDialog extends JDialog {
         dispose();
     }
 
+    /**
+     * Показує діалогове вікно і повертає збережену групу товарів.
+     *
+     * @return Збережена група товарів.
+     */
     public ProductGroup showDialog() {
         setVisible(true);
         return result;
     }
+
+    private JTextField nameField;
+    private JTextArea descriptionArea;
+    private ProductGroup result;
+    private ProductGroup originalGroup;
 }

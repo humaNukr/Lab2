@@ -10,25 +10,16 @@ import java.awt.event.KeyEvent;
 import java.text.DecimalFormat;
 import java.util.List;
 
+/**
+ * Головне вікно програми для управління складом.
+ * Реалізує інтерфейс для роботи з групами товарів та окремими товарами.
+ *
+ * @author Артем Гриценко, Заровська Анастасія
+ */
 public class MainFrame extends JFrame {
-    private WarehouseService service;
-
-    private JList<ProductGroup> groupList;
-    private DefaultListModel<ProductGroup> groupListModel;
-
-    private JTable productTable;
-    private DefaultTableModel productTableModel;
-
-    // Кнопки для роботи з групами та товарами
-    private JButton addGroupBtn, editGroupBtn, deleteGroupBtn;
-    private JButton addProductBtn, editProductBtn, deleteProductBtn;
-    private JButton addQuantityBtn, removeQuantityBtn;
-    private JButton searchBtn, statBtn;
-    private JTextField searchField;
-
-    private JLabel statusLabel;
-    private JLabel totalValueLabel;
-
+    /**
+     * Створює об'єкт головного вікна, ініціалізує компоненти інтерфейсу та завантажує дані.
+     */
     public MainFrame() {
         service = new WarehouseService();
 
@@ -41,6 +32,9 @@ public class MainFrame extends JFrame {
         setLocationRelativeTo(null);
     }
 
+    /**
+     * Налаштовує графічний інтерфейс користувача: панелі, кнопки, таблиці.
+     */
     private void setupUI() {
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -64,23 +58,22 @@ public class MainFrame extends JFrame {
         JScrollPane groupScrollPane = new JScrollPane(groupList);
         leftPanel.add(groupScrollPane, BorderLayout.CENTER);
 
-        JPanel groupButtonPanel = new JPanel(new GridLayout(1, 3, 5, 0)); // 1 рядок, 3 колонки, відступ 5 пікселів між кнопками
-groupButtonPanel.setBorder(new EmptyBorder(5, 5, 5, 5)); // Додаємо відступи від країв
+        JPanel groupButtonPanel = new JPanel(new GridLayout(1, 3, 5, 0));
+        groupButtonPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-addGroupBtn = createTextButton("➕", e -> addGroup());
-editGroupBtn = createTextButton("✏️", e -> editGroup());
-deleteGroupBtn = createTextButton("🗑️", e -> deleteGroup());
+        addGroupBtn = createTextButton("➕", e -> addGroup());
+        editGroupBtn = createTextButton("✏️", e -> editGroup());
+        deleteGroupBtn = createTextButton("🗑️", e -> deleteGroup());
+        //Підказки для кнопок
+        addGroupBtn.setToolTipText("Додати групу");
+        editGroupBtn.setToolTipText("Редагувати групу");
+        deleteGroupBtn.setToolTipText("Видалити групу");
 
-// Додаємо підказки для кнопок
-addGroupBtn.setToolTipText("Додати групу");
-editGroupBtn.setToolTipText("Редагувати групу");
-deleteGroupBtn.setToolTipText("Видалити групу");
+        groupButtonPanel.add(addGroupBtn);
+        groupButtonPanel.add(editGroupBtn);
+        groupButtonPanel.add(deleteGroupBtn);
 
-groupButtonPanel.add(addGroupBtn);
-groupButtonPanel.add(editGroupBtn);
-groupButtonPanel.add(deleteGroupBtn);
-
-leftPanel.add(groupButtonPanel, BorderLayout.SOUTH);
+        leftPanel.add(groupButtonPanel, BorderLayout.SOUTH);
 
         // Права панель з товарами
         JPanel rightPanel = new JPanel(new BorderLayout(5, 5));
@@ -161,13 +154,22 @@ leftPanel.add(groupButtonPanel, BorderLayout.SOUTH);
         add(mainPanel);
     }
 
-    // Метод для створення кнопок 
+    /**
+     * Метод для створення кнопки
+     *
+     * @param text     Текст на кнопці
+     * @param listener Обробник події
+     * @return Об'єкт JButton
+     */
     private JButton createTextButton(String text, java.awt.event.ActionListener listener) {
         JButton button = new JButton(text);
         button.addActionListener(listener);
         return button;
     }
 
+    /**
+     * Завантажує дані про групи товарів у список.
+     */
     private void loadData() {
         groupListModel.clear();
 
@@ -180,6 +182,9 @@ leftPanel.add(groupButtonPanel, BorderLayout.SOUTH);
         statusLabel.setText("Дані завантажено");
     }
 
+    /**
+     * Завантажує товари для обраної групи та відображає їх у таблиці.
+     */
     private void loadProductsForSelectedGroup() {
         productTableModel.setRowCount(0);
 
@@ -203,23 +208,29 @@ leftPanel.add(groupButtonPanel, BorderLayout.SOUTH);
         }
     }
 
+    /**
+     * Оновлює відображення загальної вартості складу.
+     */
     private void updateTotalValue() {
         DecimalFormat df = new DecimalFormat("#,##0.00");
         double totalValue = service.getTotalWarehouseValue();
         totalValueLabel.setText("Загальна вартість: " + df.format(totalValue) + " грн");
     }
 
+    /**
+     * Відкриває діалог додавання нової групи товарів.
+     */
     private void addGroup() {
         int confirm = JOptionPane.showConfirmDialog(this,
                 "Ви хочете додати нову групу товарів?",
                 "Додавання групи",
                 JOptionPane.YES_NO_OPTION,
                 JOptionPane.QUESTION_MESSAGE);
-                
+
         if (confirm == JOptionPane.YES_OPTION) {
             GroupDialog dialog = new GroupDialog(this, null);
             ProductGroup newGroup = dialog.showDialog();
-    
+
             if (newGroup != null) {
                 boolean success = service.addGroup(newGroup);
                 if (success) {
@@ -239,7 +250,10 @@ leftPanel.add(groupButtonPanel, BorderLayout.SOUTH);
             }
         }
     }
-    
+
+    /**
+     * Відкриває діалог редагування обраної групи товарів.
+     */
     private void editGroup() {
         ProductGroup selectedGroup = groupList.getSelectedValue();
         if (selectedGroup != null) {
@@ -268,6 +282,10 @@ leftPanel.add(groupButtonPanel, BorderLayout.SOUTH);
             }
         }
     }
+
+    /**
+     * Видаляє обрану групу товарів разом з її товарами.
+     */
     private void deleteGroup() {
         ProductGroup selectedGroup = groupList.getSelectedValue();
 
@@ -296,6 +314,9 @@ leftPanel.add(groupButtonPanel, BorderLayout.SOUTH);
         }
     }
 
+    /**
+     * Відкриває діалог додавання нового товару до обраної групи.
+     */
     private void addProduct() {
         ProductGroup selectedGroup = groupList.getSelectedValue();
         if (selectedGroup != null) {
@@ -304,11 +325,11 @@ leftPanel.add(groupButtonPanel, BorderLayout.SOUTH);
                     "Додавання товару",
                     JOptionPane.YES_NO_OPTION,
                     JOptionPane.QUESTION_MESSAGE);
-                    
+
             if (confirm == JOptionPane.YES_OPTION) {
                 ProductDialog dialog = new ProductDialog(this, null, selectedGroup.getName());
                 Product newProduct = dialog.showDialog();
-    
+
                 if (newProduct != null) {
                     boolean success = service.addProduct(newProduct);
                     if (success) {
@@ -327,7 +348,7 @@ leftPanel.add(groupButtonPanel, BorderLayout.SOUTH);
                     }
                 }
             }
-        }else {
+        } else {
             JOptionPane.showMessageDialog(this,
                     "Будь ласка, виберіть товар для додавання",
                     "Інформація",
@@ -335,14 +356,17 @@ leftPanel.add(groupButtonPanel, BorderLayout.SOUTH);
         }
     }
 
+    /**
+     * Відкриває діалог редагування обраного товару.
+     */
     private void editProduct() {
         int selectedRow = productTable.getSelectedRow();
-    
+
         if (selectedRow >= 0) {
             int modelRow = productTable.convertRowIndexToModel(selectedRow);
             String productName = (String) productTableModel.getValueAt(modelRow, 0);
             Product product = service.getProductByName(productName);
-    
+
             if (product != null) {
                 // Показуємо діалог підтвердження
                 int confirm = JOptionPane.showConfirmDialog(this,
@@ -350,15 +374,15 @@ leftPanel.add(groupButtonPanel, BorderLayout.SOUTH);
                         "Редагування товару",
                         JOptionPane.YES_NO_OPTION,
                         JOptionPane.QUESTION_MESSAGE);
-    
+
                 if (confirm == JOptionPane.YES_OPTION) {
                     ProductDialog dialog = new ProductDialog(this, product, product.getGroupName());
                     Product updatedProduct = dialog.showDialog();
-    
+
                     if (updatedProduct != null) {
                         String oldName = product.getName();
                         boolean success = service.updateProduct(oldName, updatedProduct);
-    
+
                         if (success) {
                             loadProductsForSelectedGroup();
                             JOptionPane.showMessageDialog(this,
@@ -384,64 +408,71 @@ leftPanel.add(groupButtonPanel, BorderLayout.SOUTH);
         }
     }
 
+    /**
+     * Видаляє обраний товар зі складу.
+     */
     private void deleteProduct() {
         int selectedRow = productTable.getSelectedRow();
         if (selectedRow >= 0) {
             int modelRow = productTable.convertRowIndexToModel(selectedRow);
             String productName = (String) productTableModel.getValueAt(modelRow, 0);
-    
+
             int confirm = JOptionPane.showConfirmDialog(this,
                     "Ви впевнені, що хочете видалити товар \"" + productName + "\"?",
                     "Видалення товару",
                     JOptionPane.YES_NO_OPTION,
                     JOptionPane.WARNING_MESSAGE);
-    
+
             if (confirm == JOptionPane.YES_OPTION) {
                 boolean success = service.deleteProduct(productName);
                 if (success) {
                     loadProductsForSelectedGroup();
                     JOptionPane.showMessageDialog(this,
-                            "Товар \"" + productName +"\" успішно видалено!",
+                            "Товар \"" + productName + "\" успішно видалено!",
                             "Успіх",
                             JOptionPane.INFORMATION_MESSAGE);
                     statusLabel.setText("Товар видалено: " + productName);
                     updateTotalValue();
                 }
             }
-        }else {
+        } else {
             JOptionPane.showMessageDialog(this,
                     "Будь ласка, виберіть товар для видалення",
                     "Інформація",
                     JOptionPane.INFORMATION_MESSAGE);
         }
     }
+
+    /**
+     * Додає вказану кількість одиниць товару до складу.
+     */
     private void addQuantity() {
         int selectedRow = productTable.getSelectedRow();
-    
+
         if (selectedRow >= 0) {
             int modelRow = productTable.convertRowIndexToModel(selectedRow);
             String productName = (String) productTableModel.getValueAt(modelRow, 0);
-    
+
             String input = JOptionPane.showInputDialog(this,
                     "Введіть кількість товару \"" + productName + "\" для додавання:",
                     "Прихід товару",
                     JOptionPane.QUESTION_MESSAGE);
-    
+
             if (input != null && !input.trim().isEmpty()) {
                 try {
                     int quantity = Integer.parseInt(input.trim());
-    
+
                     if (quantity > 0) {
                         boolean success = service.addProductQuantity(productName, quantity);
-    
+
                         if (success) {
                             loadProductsForSelectedGroup();
                             statusLabel.setText("Додано " + quantity + " од. товару: " + productName);
                             updateTotalValue();
                             // Додаємо інформаційне повідомлення
                             JOptionPane.showMessageDialog(this,
-                                    String.format("Товар \"%s\" додано на склад у кількості %d од.", 
-                                    productName, quantity),
+                                    String.format("Товар \"%s\" додано на склад у кількості %d од.",
+                                            productName, quantity),
                                     "Успішне додавання",
                                     JOptionPane.INFORMATION_MESSAGE);
                         }
@@ -465,34 +496,37 @@ leftPanel.add(groupButtonPanel, BorderLayout.SOUTH);
                     JOptionPane.INFORMATION_MESSAGE);
         }
     }
-    
+
+    /**
+     * Прибирає вказану кількість одиниць товару зі складу.
+     */
     private void removeQuantity() {
         int selectedRow = productTable.getSelectedRow();
-    
+
         if (selectedRow >= 0) {
             int modelRow = productTable.convertRowIndexToModel(selectedRow);
             String productName = (String) productTableModel.getValueAt(modelRow, 0);
-    
+
             String input = JOptionPane.showInputDialog(this,
                     "Введіть кількість товару \"" + productName + "\" для відвантаження:",
                     "Відвантаження товару",
                     JOptionPane.QUESTION_MESSAGE);
-    
+
             if (input != null && !input.trim().isEmpty()) {
                 try {
                     int quantity = Integer.parseInt(input.trim());
-    
+
                     if (quantity > 0) {
                         boolean success = service.removeProductQuantity(productName, quantity);
-    
+
                         if (success) {
                             loadProductsForSelectedGroup();
                             statusLabel.setText("Відвантажено " + quantity + " од. товару: " + productName);
                             updateTotalValue();
                             // Додаємо інформаційне повідомлення
                             JOptionPane.showMessageDialog(this,
-                                    String.format("Товар \"%s\" вилучено зі складу у кількості %d од.", 
-                                    productName, quantity),
+                                    String.format("Товар \"%s\" вилучено зі складу у кількості %d од.",
+                                            productName, quantity),
                                     "Успішне відвантаження",
                                     JOptionPane.INFORMATION_MESSAGE);
                         } else {
@@ -522,22 +556,25 @@ leftPanel.add(groupButtonPanel, BorderLayout.SOUTH);
         }
     }
 
+    /**
+     * Шукає товари за введеним запитом у полі пошуку.
+     */
     private void searchProducts() {
         String query = searchField.getText().trim().toLowerCase();
-        
+
         if (!query.isEmpty()) {
             List<Product> results = service.searchProducts(query);
             productTableModel.setRowCount(0);
-            
+
             if (!results.isEmpty()) {
                 DecimalFormat df = new DecimalFormat("#,##0.00");
-                
+
                 // Тимчасово видаляємо слухача подій вибору групи
                 ListSelectionListener[] listeners = groupList.getListSelectionListeners();
                 for (ListSelectionListener listener : listeners) {
                     groupList.removeListSelectionListener(listener);
                 }
-    
+
                 // Знаходимо та виділяємо групу першого знайденого товару
                 String groupName = results.get(0).getGroupName();
                 for (int i = 0; i < groupListModel.size(); i++) {
@@ -547,24 +584,24 @@ leftPanel.add(groupButtonPanel, BorderLayout.SOUTH);
                         break;
                     }
                 }
-    
+
                 // Показуємо тільки знайдені товари
                 for (Product product : results) {
                     productTableModel.addRow(new Object[]{
-                        product.getName(),
-                        product.getDescription(),
-                        product.getManufacturer(),
-                        product.getQuantity(),
-                        df.format(product.getPrice()),
-                        df.format(product.getTotalValue())
+                            product.getName(),
+                            product.getDescription(),
+                            product.getManufacturer(),
+                            product.getQuantity(),
+                            df.format(product.getPrice()),
+                            df.format(product.getTotalValue())
                     });
                 }
-    
+
                 // Відновлюємо слухача подій
                 for (ListSelectionListener listener : listeners) {
                     groupList.addListSelectionListener(listener);
                 }
-    
+
                 statusLabel.setText("Знайдено товарів: " + results.size());
             } else {
                 statusLabel.setText("Товарів не знайдено");
@@ -581,8 +618,29 @@ leftPanel.add(groupButtonPanel, BorderLayout.SOUTH);
     }
 
 
+    /**
+     * Відкриває діалог зі статистикою складу.
+     */
     private void showStatistics() {
         StatisticsDialog dialog = new StatisticsDialog(this, service);
         dialog.setVisible(true);
     }
+
+    private WarehouseService service;
+
+    private JList<ProductGroup> groupList;
+    private DefaultListModel<ProductGroup> groupListModel;
+
+    private JTable productTable;
+    private DefaultTableModel productTableModel;
+
+    // Кнопки для роботи з групами та товарами
+    private JButton addGroupBtn, editGroupBtn, deleteGroupBtn;
+    private JButton addProductBtn, editProductBtn, deleteProductBtn;
+    private JButton addQuantityBtn, removeQuantityBtn;
+    private JButton searchBtn, statBtn;
+    private JTextField searchField;
+
+    private JLabel statusLabel;
+    private JLabel totalValueLabel;
 }

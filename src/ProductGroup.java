@@ -4,12 +4,20 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProductGroup implements Serializable {
-    private static final long serialVersionUID = 1L;
+/**
+ * Клас ProductGroup представляє групу товарів з загальною назвою та описом.
+ * Клас також дозволяє додавати, видаляти товари та розраховувати загальну вартість групи.
+ *
+ * @author Артем Гриценко, Заровська Анастасія
+ */
 
-    private String name;
-    private String description;
-    private List<Product> products;
+public class ProductGroup implements Serializable {
+    /**
+     * Конструктор, що створює нову групу товарів.
+     *
+     * @param name        Назва групи.
+     * @param description Опис групи.
+     */
 
     public ProductGroup(String name, String description) {
         this.name = name;
@@ -50,6 +58,13 @@ public class ProductGroup implements Serializable {
         return products.remove(product);
     }
 
+    /**
+     * Видаляє товар за назвою з групи.
+     *
+     * @param productName Назва товару, який потрібно видалити.
+     * @return true, якщо товар був успішно видалений; false, якщо такого товару немає в групі.
+     */
+
     public boolean removeProductByName(String productName) {
         return products.removeIf(p -> p.getName().equals(productName));
     }
@@ -66,4 +81,10 @@ public class ProductGroup implements Serializable {
     public String toString() {
         return name;
     }
+
+    private static final long serialVersionUID = 1L;
+
+    private String name;
+    private String description;
+    private List<Product> products;
 }

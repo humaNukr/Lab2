@@ -6,19 +6,20 @@ import java.awt.*;
 import java.text.DecimalFormat;
 import java.util.List;
 
+/**
+ * Клас StatisticsDialog представляє діалогове вікно для відображення статистики складу.
+ * Містить вкладки для перегляду всіх товарів та товарів за групами, а також загальну вартість складу.
+ *
+ * @author Артем Гриценко, Заровська Анастасія
+ */
+
 public class StatisticsDialog extends JDialog {
-    private WarehouseService service;
-    private JTabbedPane tabbedPane;
-
-    private JTable allProductsTable;
-    private DefaultTableModel allProductsModel;
-
-    private JComboBox<ProductGroup> groupComboBox;
-    private JTable groupProductsTable;
-    private DefaultTableModel groupProductsModel;
-
-    private JLabel totalWarehouseValueLabel;
-    private JLabel selectedGroupValueLabel;
+    /**
+     * Конструктор, що створює нове діалогове вікно для відображення статистики складу.
+     *
+     * @param owner   Головне вікно, до якого прив'язаний цей діалог.
+     * @param service Екземпляр WarehouseService для отримання даних складу.
+     */
 
     public StatisticsDialog(Frame owner, WarehouseService service) {
         super(owner, "Статистика складу", true);
@@ -30,6 +31,10 @@ public class StatisticsDialog extends JDialog {
         setSize(800, 600);
         setLocationRelativeTo(owner);
     }
+
+    /**
+     * Налаштовує графічний інтерфейс діалогового вікна, включаючи вкладки, таблиці та кнопки.
+     */
 
     private void setupUI() {
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
@@ -107,6 +112,10 @@ public class StatisticsDialog extends JDialog {
         add(mainPanel);
     }
 
+    /**
+     * Завантажує дані про товари та групи товарів з сервісу складу.
+     * Оновлює таблиці та відповідні мітки вікна.
+     */
     private void loadData() {
         // Завантажуємо всі товари
         allProductsModel.setRowCount(0);
@@ -142,6 +151,11 @@ public class StatisticsDialog extends JDialog {
         }
     }
 
+    /**
+     * Завантажує товари для вибраної групи та оновлює таблицю товарів у групі.
+     * Оновлює мітку з вартістю групи.
+     */
+
     private void loadGroupProducts() {
         groupProductsModel.setRowCount(0);
 
@@ -166,4 +180,17 @@ public class StatisticsDialog extends JDialog {
             selectedGroupValueLabel.setText("Вартість групи \"" + selectedGroup.getName() + "\": " + df.format(groupValue) + " грн");
         }
     }
+
+    private WarehouseService service;
+    private JTabbedPane tabbedPane;
+
+    private JTable allProductsTable;
+    private DefaultTableModel allProductsModel;
+
+    private JComboBox<ProductGroup> groupComboBox;
+    private JTable groupProductsTable;
+    private DefaultTableModel groupProductsModel;
+
+    private JLabel totalWarehouseValueLabel;
+    private JLabel selectedGroupValueLabel;
 }
