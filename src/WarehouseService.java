@@ -35,12 +35,13 @@ public class WarehouseService {
 
     public boolean updateGroup(String oldName, ProductGroup updatedGroup) {
         // Якщо назва групи змінилась, перевіряємо унікальність
-        if (!oldName.equals(updatedGroup.getName()) && isGroupNameExists(updatedGroup.getName())) {
+        if (!oldName.toLowerCase().equals(updatedGroup.getName().toLowerCase()) && 
+            isGroupNameExists(updatedGroup.getName())) {
             return false;
-        }
+    }
 
-        for (int i = 0; i < groups.size(); i++) {
-            if (groups.get(i).getName().equals(oldName)) {
+    for (int i = 0; i < groups.size(); i++) {
+        if (groups.get(i).getName().toLowerCase().equals(oldName.toLowerCase())) {
                 // Отримуємо старі продукти
                 List<Product> products = groups.get(i).getProducts();
 
@@ -66,9 +67,9 @@ public class WarehouseService {
     }
 
     public boolean deleteGroup(String groupName) {
-        boolean removed = groups.removeIf(g -> g.getName().equals(groupName));
+        String lowercaseName = groupName.toLowerCase();
+        boolean removed = groups.removeIf(g -> g.getName().toLowerCase().equals(lowercaseName));
         if (removed) {
-            // Видаляємо файл з продуктами
             dataManager.deleteProductsFile(groupName);
             saveData();
         }
@@ -82,7 +83,7 @@ public class WarehouseService {
         }
 
         for (ProductGroup group : groups) {
-            if (group.getName().equals(product.getGroupName())) {
+            if (group.getName().toLowerCase().equals(product.getGroupName().toLowerCase())) {
                 group.addProduct(product);
                 dataManager.saveProducts(group.getName(), group.getProducts());
                 return true;
@@ -93,14 +94,15 @@ public class WarehouseService {
     }
 
     public boolean updateProduct(String oldName, Product updatedProduct) {
+        oldName = oldName.toLowerCase();
         // Якщо назва продукту змінилась, перевіряємо унікальність
-        if (!oldName.equals(updatedProduct.getName()) && isProductNameExists(updatedProduct.getName())) {
+        if (!oldName.equals(updatedProduct.getName().toLowerCase()) && isProductNameExists(updatedProduct.getName().toLowerCase())) {
             return false;
         }
 
         for (ProductGroup group : groups) {
             for (int i = 0; i < group.getProducts().size(); i++) {
-                if (group.getProducts().get(i).getName().equals(oldName)) {
+                if (group.getProducts().get(i).getName().toLowerCase().equals(oldName)) {
                     group.getProducts().set(i, updatedProduct);
                     dataManager.saveProducts(group.getName(), group.getProducts());
                     return true;
@@ -112,6 +114,7 @@ public class WarehouseService {
     }
 
     public boolean deleteProduct(String productName) {
+        productName = productName.toLowerCase();
         for (ProductGroup group : groups) {
             if (group.removeProductByName(productName)) {
                 dataManager.saveProducts(group.getName(), group.getProducts());
@@ -179,14 +182,14 @@ public class WarehouseService {
     }
 
     public List<Product> getProductsByGroup(String groupName) {
-        for (ProductGroup group : groups) {
-            if (group.getName().equals(groupName)) {
-                return group.getProducts();
-            }
+    String lowercaseName = groupName.toLowerCase();
+    for (ProductGroup group : groups) {
+        if (group.getName().toLowerCase().equals(lowercaseName)) {
+            return group.getProducts();
         }
-
-        return new ArrayList<>();
     }
+    return new ArrayList<>();
+}
 
     public double getTotalWarehouseValue() {
         double total = 0;
@@ -199,18 +202,19 @@ public class WarehouseService {
     }
 
     public double getGroupTotalValue(String groupName) {
+        String lowercaseName = groupName.toLowerCase();
         for (ProductGroup group : groups) {
-            if (group.getName().equals(groupName)) {
+            if (group.getName().toLowerCase().equals(lowercaseName)) {
                 return group.getTotalValue();
             }
         }
-
         return 0;
     }
 
     public ProductGroup getGroupByName(String groupName) {
+        String lowercaseName = groupName.toLowerCase();
         for (ProductGroup group : groups) {
-            if (group.getName().equals(groupName)) {
+            if (group.getName().toLowerCase().equals(lowercaseName)) {
                 return group;
             }
         }
@@ -218,9 +222,10 @@ public class WarehouseService {
     }
 
     public Product getProductByName(String productName) {
+        String lowercaseName = productName.toLowerCase();
         for (ProductGroup group : groups) {
             for (Product product : group.getProducts()) {
-                if (product.getName().equals(productName)) {
+                if (product.getName().toLowerCase().equals(lowercaseName)) {
                     return product;
                 }
             }
@@ -229,8 +234,9 @@ public class WarehouseService {
     }
 
     private boolean isGroupNameExists(String name) {
+        String lowercaseName = name.toLowerCase();
         for (ProductGroup group : groups) {
-            if (group.getName().equals(name)) {
+            if (group.getName().toLowerCase().equals(lowercaseName)) {
                 return true;
             }
         }
@@ -238,9 +244,10 @@ public class WarehouseService {
     }
 
     private boolean isProductNameExists(String name) {
+        String lowercaseName = name.toLowerCase();
         for (ProductGroup group : groups) {
             for (Product product : group.getProducts()) {
-                if (product.getName().equals(name)) {
+                if (product.getName().toLowerCase().equals(lowercaseName)) {
                     return true;
                 }
             }

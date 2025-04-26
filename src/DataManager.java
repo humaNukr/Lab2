@@ -6,18 +6,19 @@ import java.util.List;
 import java.util.Map;
 
 public class DataManager {
+    private static final String DATA_DIR = "data/";
+    private static final String GROUPS_DIR = DATA_DIR + "groups/";
+    private static final String PRODUCTS_DIR = DATA_DIR + "products/";
     private static final String GROUPS_FILE = "groups.dat";
-    private static final String PRODUCTS_DIR = "products/";
 
     public DataManager() {
-        File dir = new File(PRODUCTS_DIR);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
+        new File(GROUPS_DIR).mkdirs();
+        new File(PRODUCTS_DIR).mkdirs();
     }
 
     public void saveGroups(List<ProductGroup> groups) {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(GROUPS_FILE))) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(
+                new FileOutputStream(GROUPS_DIR + GROUPS_FILE))) {
             oos.writeObject(new ArrayList<>(groups));
         } catch (IOException e) {
             e.printStackTrace();
@@ -26,7 +27,7 @@ public class DataManager {
 
     @SuppressWarnings("unchecked")
     public List<ProductGroup> loadGroups() {
-        File file = new File(GROUPS_FILE);
+        File file = new File(GROUPS_DIR + GROUPS_FILE);
         if (!file.exists()) {
             return new ArrayList<>();
         }
